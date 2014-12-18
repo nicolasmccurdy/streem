@@ -1,0 +1,10 @@
+seq(100)
+if true {}
+if true {} else {}
+((1 + 1) * (99 / 3)) % 33
+1 < 2 && 2 <= 3 && (4 >= 5) || ((3 + 3) > 8)
+STDIN | STDOUT
+{ |x| x + 1 }
+STDIN | { |s| s + "!" } | STDOUT
+STDIN | { |s| if (s != "exit") { s } else { exit() } } | STDOUT
+seq(100) | {|x| if x % 15 == 0 { "FizzBuzz" } else if x % 3 == 0 { "Fizz" } else if x % 5 == 0 { "Buzz" } else { x } } | STDOUT
