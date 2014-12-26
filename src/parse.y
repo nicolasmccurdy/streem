@@ -6,6 +6,7 @@
 
 %{
 typedef struct parser_state {
+  int nerr;
   void *lval;
 } parser_state;
 
@@ -197,18 +198,59 @@ term            : ';' {yyerrok;}
 static void
 yyerror(parser_state *p, const char *s)
 {
+  p->nerr++;
   fprintf(stderr, "%s\n", s);
+}
+
+static int
+syntax_check(FILE *f, const char *fname)
+{
+  parser_state state = {0, NULL};
+  int n;
+
+  yyin = f;
+  n = yyparse(&state);
+
+  if (n == 0 && state.nerr == 0) {
+    printf("%s: Syntax OK\n", fname);
+    return 0;
+  }
+  else {
+    printf("%s: Syntax NG\n", fname);
+    return 1;
+  }
+}
+
+static int
+syntax_check_file(const char* fname)
+{
+  int n;
+  FILE *f = fopen(fname, "r");
+
+  if (f == NULL) {
+    fprintf(stderr, "failed to open file: %s\n", fname);
+    return 1;
+  }
+  n = syntax_check(f, fname);
+  fclose(f);
+  return n;
 }
 
 int
 main(int argc, const char**argv)
 {
-  int n;
+  int i, n = 0;
 
-  //  yydebug = 1;
-  n = yyparse(NULL);
-  if (n == 0) {
-    printf("Syntax OK\n");
+  // yydebug = 1;
+  if (argc == 1) {              /* no args */
+    n = syntax_check(stdin, "stdin");
   }
+  else {
+    for (i=1; i<argc; i++) {
+      n += syntax_check_file(argv[i]);
+    }
+  }
+
+  if (n > 0) return 1;
   return 0;
 }
